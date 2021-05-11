@@ -1,0 +1,8 @@
+{
+  "name": "say-anything",
+  "version": "1.0.0",
+  "description": "game server",
+  "main": "app.js",
+  "author": "Jacob Strong",
+  "license": "MIT"
+}
