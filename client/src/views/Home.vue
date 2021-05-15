@@ -1,6 +1,7 @@
 <template>
   <v-card>
-    samantha
+    <v-btn color="success" to="/host">host</v-btn>
+    <v-btn color="success" to="/player">player</v-btn>
   </v-card>
 </template>
 

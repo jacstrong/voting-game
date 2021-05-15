@@ -9,8 +9,8 @@
       <v-container fill-height fluid>
         <v-row class="fill-height">
           <v-col cols="3" fill-height>
-            <v-card v-for="name in ['jacob', 'josh', 'grace', 'samantha']" :key="name">
-              {{name}}
+            <v-card v-for="player in gameState.players" :key="player.name">
+              {{player.name}}
             </v-card>
           </v-col>
           <v-col v-if="state === 'a'" cols="9" class="">
@@ -55,6 +55,7 @@
             Time remaining
           </v-sheet>
         </v-row>
+        <v-btn color="success" @click="test()">text</v-btn>
       </v-container>
     </v-sheet>
   </v-container>
@@ -68,7 +69,44 @@ export default {
   },
 
   data: () => ({
-    state: 'b'
-  })
+    state: 'b',
+    socket: null,
+    gameState: {
+      turn: 0,
+      round: 0,
+      players: [],
+      time: 0
+    }
+  }),
+
+  methods: {
+    test () {
+      this.socket.send(JSON.stringify({type: 'host'}));
+    }
+  },
+
+  created () {
+    this.socket = new WebSocket('ws://localhost:3000')
+
+//     // Connection opened
+    this.socket.addEventListener('open', (event) => {
+      console.log('Connected to WS Server')
+      this.socket.send(JSON.stringify({type: 'host'}))
+    });
+
+//     // Listen for messages
+    this.socket.addEventListener('message', (event) => {
+      console.log('Message from server ', event.data);
+      const m = JSON.parse(event.data)
+      switch (m.type) {
+        case 'update':
+          console.log('yoyoyoyoyoyo')
+          this.gameState = {...m.gameState}
+          break;
+        default:
+          break;
+      }
+    });
+  }
 }
 </script>
