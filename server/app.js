@@ -6,19 +6,19 @@ const WebSocket = require('ws')
 
 const wss = new WebSocket.Server({ server })
 
-const gameState = {
+let gameState = {
   state: 'lobby',
   turn: 0,
   round: 0,
-  players: [], // {name, score, color, icon}
+  players: [], // {name, score, status, ws, guid}
   time: 0,
 }
 
 let host = null
 
-const players = []
+let players = []
 
-const round = {
+let round = {
   it: 0,
   players: [], //{name, answer, votes}
   state: 'answering',
@@ -46,40 +46,14 @@ wss.on('connection', function connection(ws) {
         updateHost()
         break
       case 'returning':
-        const player = gameState.players.findIndex(e => e.guid === m.guid)
-        if (player !== -1) {
-          gameState.players[player].ws = ws
-          ws.send(JSON.stringify({
-            type: 'reconnect',
-            name: gameState.players[player].name,
-            status: gameState.players[player].status
-          }))
-        }
+        returningHandler(m, ws)
         break
       case 'name':
-        if (gameState.players.findIndex(e => e.name === m.name) !== -1) {
-          ws.send(JSON.stringify({
-            type: 'input-error',
-            message: 'Name already exists'
-          }))
-          return
-        }
-        const guid = guidGenerator()
-        gameState.players.push({
-          name: m.name,
-          score: 0,
-          status: 'waiting',
-          ws,
-          guid
-        })
-        ws.send(JSON.stringify({
-          type: 'player-added',
-          status: 'waiting',
-          guid
-        }))
-        updateHost()
+        nameHandler(m, ws)
         break
-
+      case 'start-game':
+        startGameHandler(m, ws)
+        break
       default:
         break
     }
@@ -97,16 +71,71 @@ function updateHost () {
   }
   host.send(JSON.stringify({
     type: 'update',
-    gameState: simpleGameState()
+    gameState
   }))
 }
 
-function simpleGameState () {
-  let ret = gameState
-  ret.players.forEach(e => {
-    e.ws = null
-  });
-  return ret
+function updatePlayersState () {
+  players.forEach(e => {
+    e.ws.send(JSON.stringify({
+      type: 'status-update',
+      // status: e.status
+      status: 'other'
+    }))
+  })
+}
+
+
+function returningHandler (m, ws) {
+  const player = gameState.players.findIndex(e => e.guid === m.guid)
+  if (player !== -1) {
+    players[player].ws = ws
+    ws.send(JSON.stringify({
+      type: 'reconnect',
+      name: gameState.players[player].name,
+      status: gameState.players[player].status
+    }))
+  }
+}
+
+function nameHandler (m, ws) {
+  
+  if (players.findIndex(e => e.name === m.name) !== -1) {
+    ws.send(JSON.stringify({
+      type: 'input-error',
+      message: 'Name already exists'
+    }))
+    return
+  }
+  
+  const guid = guidGenerator()
+  
+  gameState.players.push({
+    name: m.name,
+    score: 0,
+    status: 'waiting',
+    guid
+  })
+  
+  players.push({
+    guid,
+    ws,
+    name: m.name
+  })
+  
+  ws.send(JSON.stringify({
+    type: 'player-added',
+    status: 'waiting',
+    guid
+  }))
+  updateHost()
+}
+
+function startGameHandler (m, ws) {
+  gameState.state = 'question'
+  gameState.round = 1
+  updatePlayersState()
+  updateHost()
 }
 
 function guidGenerator() {

@@ -31,6 +31,9 @@
         </v-card-text>
       </v-col>
     </v-row>
+    <v-row v-else>
+      status: {{status}}
+    </v-row>
   </v-container>
 </template>
 
@@ -93,6 +96,8 @@ export default {
           this.inputError = true
           this.message = m.message
           break
+        case 'status-update':
+          this.status = m.status
         default:
           break;
       }

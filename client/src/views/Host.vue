@@ -9,25 +9,37 @@
       <v-container fill-height fluid>
         <v-row class="fill-height">
           <v-col cols="3" fill-height>
-            <v-card v-for="player in gameState.players" :key="player.name">
-              {{player.name}}
+            <v-card>
+              <v-card-title primary-title>
+                Players
+              </v-card-title>
+            </v-card>
+            <v-card
+              v-for="player in gameState.players"
+              :key="player.name"
+              class="mt-1"
+            >
+              <v-card-text class="pa-2">
+                {{player.name}}
+              </v-card-text>
             </v-card>
           </v-col>
-          <v-col v-if="state === 'a'" cols="9" class="">
-            <v-sheet
-              width="100%"
-              color="blue"
-              class="pa-3 rounded-t"
+          <v-col v-if="state === 'lobby'" cols="9" class="">
+            <v-card>
+              <v-card-text>
+                Connect as a player to join the game
+              </v-card-text>
+            </v-card>
+            <v-btn
+              color="blue my-3"
+              @click="startGame()"
             >
-              How old will Jacob be when he dies?
-            </v-sheet>
-            <v-sheet
-              color="white"
-              width="100%"
-              class="fill-height"
-            >
-              Please fill out the answers on your phone!
-            </v-sheet>
+              Start Game
+            </v-btn>
+            <!-- <v-card>
+              <v-card-actions>
+              </v-card-actions>
+            </v-card> -->
           </v-col>
           <v-col v-else-if="state === 'b'" cols="9" >
             <v-card
@@ -69,7 +81,7 @@ export default {
   },
 
   data: () => ({
-    state: 'b',
+    state: 'lobby',
     socket: null,
     gameState: {
       turn: 0,
@@ -81,7 +93,10 @@ export default {
 
   methods: {
     test () {
-      this.socket.send(JSON.stringify({type: 'host'}));
+      this.socket.send(JSON.stringify({type: 'host'}))
+    },
+    startGame () {
+      this.socket.send(JSON.stringify({type: 'start-game'}))
     }
   },
 
