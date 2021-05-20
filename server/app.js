@@ -240,7 +240,7 @@ function answerExists (answer) {
 }
 
 function answerHandler (m, ws) {
-  if (answerExists()) {
+  if (answerExists(m.answer)) {
     ws.send(JSON.stringify({
       type: 'input-error',
       message: 'Too close to another answer'
