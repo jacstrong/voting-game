@@ -17,16 +17,21 @@
             <v-card
               v-for="player in gameState.players"
               :key="player.name"
-              class="mt-1"
+              :class="`mt-1 ${player.status === 'waiting' ? player.color : ''}`"
             >
               <v-card-text class="pa-2">
-                {{player.name}}
+                {{player.score + ' ' + player.name}}
+              </v-card-text>
+            </v-card>
+            <v-card class="mt-1">
+              <v-card-text>
+                Status: {{gameState.status}}
               </v-card-text>
             </v-card>
           </v-col>
-          <v-col v-if="state === 'lobby'" cols="9" class="">
+          <v-col v-if="gameState.status === 'lobby'" cols="9" class="">
             <v-card>
-              <v-card-text>
+              <v-card-text class="headline">
                 Connect as a player to join the game
               </v-card-text>
             </v-card>
@@ -36,30 +41,79 @@
             >
               Start Game
             </v-btn>
-            <!-- <v-card>
-              <v-card-actions>
-              </v-card-actions>
-            </v-card> -->
           </v-col>
-          <v-col v-else-if="state === 'b'" cols="9" >
+          <v-col v-else-if="gameState.status === 'question'" cols="9" >
             <v-card
               width="100%"
               color="blue"
-              class="rounded-t"
+              class=""
             >
-              <v-card-title primary-title>
-                How old will Jacob be when he dies?
-              </v-card-title>
+              <v-card-text class="headline">
+                {{gameState.question}}
+              </v-card-text>
             </v-card>
-              <v-card v-for="answer in ['29', '22', '25', '35', '60']" :key="answer" class="ma-3">
-                {{answer}}
+            <!-- <v-card
+              v-for="player in notIt"
+              :key="player.guid"
+              class="ma-3"
+            >
+              {{player.answer}}
+              <v-icon
+                right
+              >
+                mdi-checkbox-marked-circle
+              </v-icon>
+            </v-card> -->
+          </v-col>
+          <v-col v-else-if="gameState.status === 'vote'">
+            <v-card
+              color="blue"
+            >
+              <v-card-text class="headline">
+                {{gameState.question}}
+              </v-card-text>
+            </v-card>
+            <v-card
+              v-for="player in onlyAnswers"
+              :key="player.guid"
+              class="ma-3"
+            >
+              <v-card-text>
+                {{player.answer}}
+              </v-card-text>
+            </v-card>
+          </v-col>
+          <v-col v-else-if="gameState.status === 'reveal'">
+            <v-card
+              width="100%"
+              color="blue"
+            >
+              <v-card-text class="headline">
+                {{gameState.question}}
+              </v-card-text>
+            </v-card>
+            <v-card
+              v-for="player in onlyAnswers"
+              :key="player.guid"
+              :class="`ma-3 ${player.guid === gameState.correct ? 'green lighten-3' : ''}`"
+            >
+              <v-card-text>
                 <v-icon
-                  right
+                  v-for="color in player.votes"
+                  :key="color + Date.now()"
+                  :color="color"
                 >
-                  mdi-checkbox-marked-circle
+                  M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z
                 </v-icon>
-              </v-card>
-            <!-- </v-sheet> -->
+                {{player.answer}}
+              </v-card-text>
+            </v-card>
+            <v-btn
+              color="success"
+              @click="submitScore"
+            >
+              score
+            </v-btn>
           </v-col>
         </v-row>
         <v-row>
@@ -81,27 +135,62 @@ export default {
   },
 
   data: () => ({
-    state: 'lobby',
     socket: null,
     gameState: {
       turn: 0,
       round: 0,
       players: [],
-      time: 0
+      time: 0,
+      state: 'lobby',
+      question: '',
+      correct: ''
     }
   }),
 
   methods: {
     test () {
-      this.socket.send(JSON.stringify({type: 'host'}))
+      this.socket.send(JSON.stringify({type: 'test'}))
     },
     startGame () {
       this.socket.send(JSON.stringify({type: 'start-game'}))
+    },
+    submitScore () {
+      this.socket.send(JSON.stringify({type: 'score'}))
     }
+  },
+
+  computed: {
+    notIt () {
+      let ret = []
+      this.gameState.players.forEach(e => {
+        if (e.status !== 'it') {
+          ret.push(e)
+        }
+      })
+      return ret
+    },
+    onlyAnswers () {
+      let ret = []
+      this.gameState.players.forEach(e => {
+        if (e.answer !== '') {
+          ret.push(e)
+        }
+      })
+      return ret
+    },
+    correct () {
+      let i =  this.gameState.players.findIndex(e => e.guid === this.gameState.correct)
+      if (i !== -1) {
+        return this.gameState.players[i].answer
+      } else {
+        return 'bad juju'
+      }
+    },
   },
 
   created () {
     this.socket = new WebSocket('ws://localhost:3000')
+    // this.socket = new WebSocket(`ws://${window.location.host}`)
 
 //     // Connection opened
     this.socket.addEventListener('open', (event) => {
@@ -115,8 +204,10 @@ export default {
       const m = JSON.parse(event.data)
       switch (m.type) {
         case 'update':
-          console.log('yoyoyoyoyoyo')
           this.gameState = {...m.gameState}
+          this.gameState.players.sort((a, b) => {
+            return a.guid[this.gameState.round] > b.guid[this.gameState.round]
+          })
           break;
         default:
           break;
