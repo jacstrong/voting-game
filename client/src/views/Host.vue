@@ -28,6 +28,11 @@
                 Status: {{gameState.status}}
               </v-card-text>
             </v-card>
+            <v-card class="mt-1">
+              <v-card-text>
+                Round: {{gameState.round}}
+              </v-card-text>
+            </v-card>
           </v-col>
           <v-col v-if="gameState.status === 'lobby'" cols="9" class="">
             <v-card>
@@ -116,12 +121,12 @@
             </v-btn>
           </v-col>
         </v-row>
-        <v-row>
+        <!-- <v-row>
           <v-sheet height="20px" width="80%" color="green">
             Time remaining
           </v-sheet>
         </v-row>
-        <v-btn color="success" @click="test()">text</v-btn>
+        <v-btn color="success" @click="test()">text</v-btn> -->
       </v-container>
     </v-sheet>
   </v-container>
@@ -189,8 +194,8 @@ export default {
   },
 
   created () {
-    this.socket = new WebSocket('ws://localhost:3000')
-    // this.socket = new WebSocket(`ws://${window.location.host}`)
+    // this.socket = new WebSocket('ws://localhost:3000')
+    this.socket = new WebSocket(`ws://${window.location.host}`)
 
 //     // Connection opened
     this.socket.addEventListener('open', (event) => {

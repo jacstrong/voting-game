@@ -79,7 +79,7 @@
     </v-row>
     <v-row v-else-if="status === 'vote-correct'">
       <v-col>
-        <v-card-text>
+        <v-card-text class="headline">
           Choose your favorite answer.
         </v-card-text>
       </v-col>
@@ -88,7 +88,7 @@
           v-for="player in activeAnswers"
           :key="player.guid"
           @click="chosenAnswer = player.guid"
-          :class="`${chosenAnswer === player.guid ? 'blue' : ''}`"
+          :class="`my-1 ${chosenAnswer === player.guid ? color : ''}`"
         >
           <v-card-text>
             {{player.answer}}
@@ -106,7 +106,7 @@
     </v-row>
     <v-row v-else-if="status === 'vote-guess'">
       <v-col>
-        <v-card-text>
+        <v-card-text class="headline">
           Choose the answer you think will be chosen.
         </v-card-text>
       </v-col>
@@ -115,6 +115,7 @@
           v-for="player in activeAnswers"
           :key="player.guid"
           @click="chooseGuess(player.guid)"
+          class="my-1"
         >
           <v-card-text>
             <v-icon class="" v-if="chosenGuesses[0] == player.guid">
@@ -210,6 +211,7 @@ export default {
         answer: this.answer,
         guid: this.guid
       }))
+      this.answer = ''
     },
     submitCorrect () {
       this.socket.send(JSON.stringify({
