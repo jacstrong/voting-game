@@ -19,17 +19,17 @@
               :key="player.name"
               :class="`mt-1 ${player.status === 'waiting' ? player.color : ''}`"
             >
-              <v-card-text class="pa-2">
+              <v-card-text class="pa-2 title">
                 {{player.score + ' ' + player.name}}
               </v-card-text>
             </v-card>
             <v-card class="mt-1">
-              <v-card-text>
+              <v-card-text class="title">
                 Status: {{gameState.status}}
               </v-card-text>
             </v-card>
             <v-card class="mt-1">
-              <v-card-text>
+              <v-card-text class="title">
                 Round: {{gameState.round}}
               </v-card-text>
             </v-card>
@@ -83,7 +83,7 @@
               :key="player.guid"
               class="ma-3"
             >
-              <v-card-text>
+              <v-card-text class="title">
                 {{player.answer}}
               </v-card-text>
             </v-card>
@@ -102,7 +102,7 @@
               :key="player.guid"
               :class="`ma-3 ${player.guid === gameState.correct ? 'green lighten-3' : ''}`"
             >
-              <v-card-text>
+              <v-card-text class="title">
                 <v-icon
                   v-for="color in player.votes"
                   :key="color + Date.now()"
@@ -125,8 +125,8 @@
           <v-sheet height="20px" width="80%" color="green">
             Time remaining
           </v-sheet>
-        </v-row>
-        <v-btn color="success" @click="test()">text</v-btn> -->
+        </v-row> -->
+        <!-- <v-btn color="success" @click="test()">text</v-btn> -->
       </v-container>
     </v-sheet>
   </v-container>
@@ -194,8 +194,8 @@ export default {
   },
 
   created () {
-    // this.socket = new WebSocket('ws://localhost:3000')
-    this.socket = new WebSocket(`ws://${window.location.host}`)
+    this.socket = new WebSocket('ws://localhost:80')
+    // this.socket = new WebSocket(`ws://${window.location.host}`)
 
 //     // Connection opened
     this.socket.addEventListener('open', (event) => {

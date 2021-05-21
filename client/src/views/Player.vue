@@ -90,7 +90,7 @@
           @click="chosenAnswer = player.guid"
           :class="`my-1 ${chosenAnswer === player.guid ? color : ''}`"
         >
-          <v-card-text>
+          <v-card-text class="body-1">
             {{player.answer}}
           </v-card-text>
         </v-card>
@@ -117,7 +117,7 @@
           @click="chooseGuess(player.guid)"
           class="my-1"
         >
-          <v-card-text>
+          <v-card-text class="body-1">
             <v-icon class="" v-if="chosenGuesses[0] == player.guid">
               M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z
             </v-icon>
