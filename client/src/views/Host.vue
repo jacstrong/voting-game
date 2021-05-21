@@ -194,8 +194,8 @@ export default {
   },
 
   created () {
-    this.socket = new WebSocket('ws://localhost:80')
-    // this.socket = new WebSocket(`ws://${window.location.host}`)
+    // this.socket = new WebSocket('ws://localhost:80')
+    this.socket = new WebSocket(`ws://${window.location.host}`)
 
 //     // Connection opened
     this.socket.addEventListener('open', (event) => {
