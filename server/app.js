@@ -103,10 +103,21 @@ function calculateScore (m, ws) {
       if (e.guesses[1] === correct) {
         e.score += 4
       }
+      bonusPoint(e.guesses[0])
+      bonusPoint(e.guesses[1])
     }
   })
   updateHost()
   nextTurn()
+}
+
+function bonusPoint (guid) {
+  let i = indexOfStatePlayer(guid)
+  if (i >= 0) {
+    gameState.players[i].score += 1
+  } else {
+    console.log('something went very wrong: 119')
+  }
 }
 
 function guessHandler (m, ws) {
@@ -378,12 +389,12 @@ function guidGenerator() {
      return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
   };
   // return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
-  return (S4()+'-'+S4());
+  return (S4()+'-'+S4()+'-'+S4());
 }
 
 app.use(express.static(path.join(__dirname, 'dist')))
 
-server.listen(3000, () => console.log(`Lisening on port :3000`))
+server.listen(80, () => console.log(`Lisening on port :3000`))
 
 function setTestGameState () {
   gameState = {
